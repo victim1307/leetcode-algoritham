@@ -24,6 +24,25 @@ class Solution:
 
 ### Day 2 Two Pointers
 ```python
+# class Solution:
+#     def rotate(self, nums: List[int], k: int) -> List[int]:
+#         """
+#         Do not return anything, modify nums in-place instead.
+#         """
+#         nl=[]
+#         nl=list(reversed(nums[k:]))+nums[0:k-1]
+#         return(nl)
+class Solution:
+    def rotate(self, nums: List[int], k: int) -> None:
+        nums.reverse()
+        for i in range(k):
+            nums.append(nums[i])
+        nums[:] = nums[k:]
+        nums.reverse()
+```
+
+### Day 3
+```python
 
 
 ```
