@@ -1,6 +1,6 @@
 https://leetcode.com/study-plan/algorithm/?progress=xows97ec
 
-Algorithm ![image](https://user-images.githubusercontent.com/78896740/191184242-8b625190-ad0f-4f52-a7f8-f45b39ab842c.png){:height="36px" width="36px"}
+Algorithm 🧮
 
 ### Day 1 Binary Search
 ```python
