@@ -1,81 +1,99 @@
+// Non-preemptive priority scheduling algorithm
+// user enters arrival time, burst time and priority number of 5 processes
+
 #include <stdio.h>
-#include <stdbool.h>
+#include <stdlib.h>
 
-void swap(int *x, int *y)
-{
-	int tmp = *x;
-	*x = *y;
-	*y = tmp;
+#define totalprocess 5
+
+typedef struct process {
+    int at, bt, pr, pno;
+} process;
+
+process proc[totalprocess];
+
+int comparator(const void *a, const void *b) {
+    return (*(int *) a - *(int *) b);
 }
 
-void solve(int n, int bt[], int p[], int wt[], int tat[], int ct[], int pno[])
-{
-	int t = 0;
+void get_wt_time(int wt[]) {
+    int service[50];
 
-	for (int i = 0; i < n; i++)
-	{
-		printf("process %d runs from %d to %d \n", pno[i], t, t + bt[i]);
-		t = t + bt[i];
-		ct[i] = t;
-		wt[i] = ct[i] - bt[i];
-	}
+    service[0] = 0;
+    wt[0] = 0;
 
-	for (int i = 0; i < n; i++)
-		tat[i] = bt[i] + wt[i];
+    for (int i = 1; i < totalprocess; i++) {
+        service[i] = proc[i - 1].bt + service[i - 1];
+
+        wt[i] = service[i] - proc[i].at + 1;
+
+        if (wt[i] < 0) {
+            wt[i] = 0;
+        }
+    }
+
 }
 
-int main()
-{
-	int n, *p, *bt, *wt, *tat, *ct, *pno;
-	int sum = 0;
-	printf("Enter the number of processes:");
-	scanf("%d", &n);
-	p = (int *)malloc(n * sizeof(int));
-	bt = (int *)malloc(n * sizeof(int));
-	wt = (int *)malloc(n * sizeof(int));
-	tat = (int *)malloc(n * sizeof(int));
-	ct = (int *)malloc(n * sizeof(int));
-	pno = (int *)malloc(n * sizeof(int));
+void get_tat_time(int tat[], const int wt[]) {
+    for (int i = 0; i < totalprocess; i++) {
+        tat[i] = proc[i].bt + wt[i];
+    }
+}
 
-	printf("Enter the burst time and priority of the processes \n");
-	printf("-------------------------------------------------------------\n");
-	for (int i = 0; i < n; i++)
-	{
-		pno[i] = i + 1;
-		printf("Burst time for process %d:", i + 1);
-		scanf("%d", &bt[i]);
-		printf("Priority for process %d:", i + 1);
-		scanf("%d", &p[i]);
-		printf("\n");
-	}
+void findgc() {
 
-	for (int i = 0; i < n; i++)
-	{
-		for (int j = 0; j < n - i; j++)
-		{
-			if (p[j] > p[j + 1])
-			{
-				swap(&p[j], &p[j + 1]);
-				swap(&bt[j], &bt[j + 1]);
-				swap(&pno[j], &pno[j + 1]);
-			}
-		}
-	}
-	printf("The priority based non-preemptive scheduling for given process is as follows \n");
-	printf("-------------------------------------------------------------\n\n");
-	solve(n, bt, p, wt, tat, ct, pno);
+    int wt[50], tat[50];
 
-	int sum_wt = 0, sum_tat = 0;
-	printf("\t\tProcess\t\tBurst Time\tPriority\tWaiting Time\tTurn_Around Time\tCompletion Time\n");
-	for (int i = 0; i < n; i++)
-	{
-		sum_wt += wt[i];
-		sum_tat += tat[i];
+    double wavg = 0, tavg = 0;
 
-		printf("\t\t%d\t\t%d\t\t%d\t\t%d\t\t%d\t\t\t%d\n", pno[i], bt[i], p[i], wt[i], tat[i], ct[i]);
-	}
-	printf("Average waiting time:%f sec\n", (float)sum_wt / n);
-	printf("Average turn around time:%d sec\n", (float)sum_tat / n);
 
-	return 0;
+    get_wt_time(wt);
+
+    get_tat_time(tat, wt);
+
+    int stime[50], ctime[50];
+    stime[0] = 1;
+    ctime[0] = stime[0] + tat[0];
+
+
+    for (int i = 1; i < totalprocess; i++) {
+        stime[i] = ctime[i - 1];
+        ctime[i] = stime[i] + tat[i] - wt[i];
+    }
+
+    printf("ProcessNo.\tPriorityNo.\tArrivalTime\tBurstTime\tCompletionTime\tTurnAroundTime\tWaitingTime\tResponseTime\n\n");
+
+
+    for (int i = 0; i < totalprocess; i++) {
+        wavg += wt[i];
+        tavg += tat[i];
+
+        printf("%d \t\t\t\t%d \t\t%d \t\t\t\t%d \t\t\t\t%d \t\t\t\t\t%d \t\t\t%d \t\t\t %d\n", proc[i].pno, proc[i].pr,
+               proc[i].at,
+               proc[i].bt, ctime[i], tat[i],
+               wt[i], (stime[i] - proc[i].at));
+    }
+
+    printf("Average waiting time is : ");
+    printf("%f\n", wavg / (float) totalprocess);
+    printf("Average turnaround time : ");
+    printf("%f\n", tavg / (float) totalprocess);
+
+}
+
+int main() {
+
+    for (int i = 0; i < totalprocess; i++) {
+        printf("\nEnter Process No., Arrival Time, Burst Time, Priority No. for (process %d) :\n", (i + 1));
+        scanf("%d", &proc[i].pno);
+        scanf("%d", &proc[i].at);
+        scanf("%d", &proc[i].bt);
+        scanf("%d", &proc[i].pr);
+    }
+
+    qsort(proc, totalprocess, sizeof(proc[0]), comparator);
+
+    findgc();
+
+    return 0;
 }
